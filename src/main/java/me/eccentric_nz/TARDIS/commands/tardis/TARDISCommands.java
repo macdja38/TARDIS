@@ -21,6 +21,7 @@ import java.util.Locale;
 import me.eccentric_nz.TARDIS.TARDIS;
 import me.eccentric_nz.TARDIS.advanced.TARDISDiskWriterCommand;
 import me.eccentric_nz.TARDIS.arch.TARDISArchCommand;
+import me.eccentric_nz.TARDIS.bungeecord.TARDISBungeeCommand;
 import me.eccentric_nz.TARDIS.chatGUI.TARDISUpdateChatGUI;
 import me.eccentric_nz.TARDIS.commands.TARDISCommandHelper;
 import me.eccentric_nz.TARDIS.database.ResultSetTardis;
@@ -92,6 +93,9 @@ public class TARDISCommands implements CommandExecutor {
                 if (plugin.getTrackerKeeper().getInSiegeMode().contains(rs.getTardis_id()) && tc.noSiege()) {
                     TARDISMessage.send(player, "SIEGE_NO_CMD");
                     return true;
+                }
+                if (args[0].equalsIgnoreCase("bungee")) {
+                    return new TARDISBungeeCommand(plugin).cord(player, args);
                 }
                 if (args[0].equalsIgnoreCase("add")) {
                     return new TARDISAddCompanionCommand(plugin).doAdd(player, args);

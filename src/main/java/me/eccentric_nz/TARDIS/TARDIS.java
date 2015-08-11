@@ -43,6 +43,7 @@ import me.eccentric_nz.TARDIS.builders.TARDISBuilderInner;
 import me.eccentric_nz.TARDIS.builders.TARDISConsoleLoader;
 import me.eccentric_nz.TARDIS.builders.TARDISPresetBuilderFactory;
 import me.eccentric_nz.TARDIS.builders.TARDISSpace;
+import me.eccentric_nz.TARDIS.bungeecord.TARDISMessageListener;
 import me.eccentric_nz.TARDIS.chameleon.TARDISChameleonPreset;
 import me.eccentric_nz.TARDIS.chatGUI.TARDISChatGUIJSON;
 import me.eccentric_nz.TARDIS.database.QueryFactory;
@@ -347,6 +348,7 @@ public class TARDIS extends JavaPlugin {
                 condensables = cond.getCondensables();
                 checkBiomes();
                 checkDropChests();
+                loadPluginMessageChannels();
             } catch (ClassNotFoundException e) {
                 console.sendMessage(pluginName + ChatColor.RED + "You need to update CraftBukkit/Spigot, disabling...");
                 pm.disablePlugin(this);
@@ -1089,5 +1091,10 @@ public class TARDIS extends JavaPlugin {
 
     public List<String> getCleanUpWorlds() {
         return cleanUpWorlds;
+    }
+
+    private void loadPluginMessageChannels() {
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new TARDISMessageListener(this));
     }
 }
