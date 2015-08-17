@@ -16,9 +16,13 @@
  */
 package me.eccentric_nz.TARDIS.bungeecord;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.UUID;
 import me.eccentric_nz.TARDIS.TARDIS;
 
 /**
@@ -67,5 +71,42 @@ public class TeleportManager {
                 plugin.debug("Could not close output streams! " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Gets a byte array of converted objects.
+     *
+     * @param data to convert
+     * @return converted objects in byte array
+     */
+    public static byte[] toByteArray(Collection<Object> data) {
+        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+
+        for (Object obj : data) {
+            if (obj instanceof byte[]) {
+                output.write((byte[]) obj);
+            } else if (obj instanceof Byte) {
+                output.writeByte((Integer) obj);
+            } else if (obj instanceof Boolean) {
+                output.writeBoolean((Boolean) obj);
+            } else if (obj instanceof Character) {
+                output.writeChar((Character) obj);
+            } else if (obj instanceof Short) {
+                output.writeShort((Short) obj);
+            } else if (obj instanceof Integer) {
+                output.writeInt((Integer) obj);
+            } else if (obj instanceof Long) {
+                output.writeLong((Long) obj);
+            } else if (obj instanceof Double) {
+                output.writeDouble((Double) obj);
+            } else if (obj instanceof Float) {
+                output.writeFloat((Float) obj);
+            } else if (obj instanceof String) {
+                output.writeUTF((String) obj);
+            } else if (obj instanceof UUID) {
+                output.writeUTF(((UUID) obj).toString());
+            }
+        }
+        return output.toByteArray();
     }
 }
