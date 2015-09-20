@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import me.eccentric_nz.TARDIS.TARDIS;
 import me.eccentric_nz.TARDIS.enumeration.CONSOLES;
 import me.eccentric_nz.TARDIS.enumeration.DISK_CIRCUIT;
@@ -57,7 +58,7 @@ public class TARDISCraftListener implements Listener {
 
     private final TARDIS plugin;
     private final List<Integer> c = new ArrayList<Integer>();
-    private final List<Integer> l = new ArrayList<Integer>();
+    private final List<Material> l = new ArrayList<Material>();
     private final HashMap<Material, String> t = new HashMap<Material, String>();
     private final List<Material> hasColour = new ArrayList<Material>();
     private final TARDISWallsLookup twl;
@@ -65,6 +66,7 @@ public class TARDISCraftListener implements Listener {
 
     public TARDISCraftListener(TARDIS plugin) {
         this.plugin = plugin;
+        // DELUXE, ELEVENTH, TWELFTH, ARS & REDSTONE schematics supplied by Lord_Rahl and killeratnight at mcnovus.net
         t.put(Material.BOOKSHELF, "PLANK"); // plank
         t.put(Material.COAL_BLOCK, "STEAMPUNK"); // steampunk
         t.put(Material.DIAMOND_BLOCK, "DELUXE"); // deluxe
@@ -76,19 +78,28 @@ public class TARDISCraftListener implements Listener {
         t.put(Material.QUARTZ_BLOCK, "ARS"); // ARS
         t.put(Material.REDSTONE_BLOCK, "REDSTONE"); // redstone
         t.put(Material.STAINED_CLAY, "WAR"); // war doctor
-        t.put(Material.SANDSTONE_STAIRS, "PYRAMID"); // pyramid
+        t.put(Material.SANDSTONE_STAIRS, "PYRAMID"); // pyramid schematic supplied by airomis (player at thatsnotacreeper.com)
+        t.put(Material.NETHER_BRICK, "MASTER"); // master schematic supplied by macdja38 at pvpcraft.ca
         // custom seeds
         for (String console : plugin.getCustomConsolesConfig().getKeys(false)) {
             if (plugin.getCustomConsolesConfig().getBoolean(console + ".enabled")) {
-                Material cmat = Material.valueOf(plugin.getCustomConsolesConfig().getString(console + ".seed"));
-                t.put(cmat, console.toUpperCase());
+                if (plugin.getArtronConfig().contains("upgrades." + console.toLowerCase())) {
+                    Material cmat = Material.valueOf(plugin.getCustomConsolesConfig().getString(console + ".seed"));
+                    t.put(cmat, console.toUpperCase());
+                } else {
+                    plugin.getLogger().log(Level.WARNING, "The custom console {0} does not have a corresponding upgrade value in artron.", console);
+                }
             }
         }
         for (Integer i : plugin.getBlocksConfig().getIntegerList("chameleon_blocks")) {
             c.add(i);
         }
-        for (Integer a : plugin.getBlocksConfig().getIntegerList("lamp_blocks")) {
-            l.add(a);
+        for (String a : plugin.getBlocksConfig().getStringList("lamp_blocks")) {
+            try {
+                l.add(Material.valueOf(a));
+            } catch (IllegalArgumentException e) {
+                plugin.debug("Invalid Material in lamp_blocks section.");
+            }
         }
         hasColour.add(Material.WOOL);
         hasColour.add(Material.STAINED_CLAY);
@@ -235,7 +246,7 @@ public class TARDISCraftListener implements Listener {
                     break;
                 case 5:
                     // must be a valid lamp block
-                    if (!l.contains(id)) {
+                    if (!l.contains(m)) {
                         return false;
                     }
                     break;

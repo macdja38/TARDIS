@@ -57,6 +57,7 @@ public class TARDISBuilderInner {
     private final TARDIS plugin;
     List<Block> lampblocks = new ArrayList<Block>();
     List<Material> precious = new ArrayList<Material>();
+    private Block postBedrock = null;
 
     public TARDISBuilderInner(TARDIS plugin) {
         this.plugin = plugin;
@@ -66,13 +67,15 @@ public class TARDISBuilderInner {
         this.precious.add(Material.GOLD_BLOCK);
         this.precious.add(Material.IRON_BLOCK);
         this.precious.add(Material.REDSTONE_BLOCK);
+        this.precious.add(Material.BEDROCK);
     }
 
     /**
      * Builds the inside of the TARDIS.
      *
-     * @param schm the name of the schematic file to use can be DEFAULT, BIGGER,
-     * ELEVENTH, REDSTONE, COAL, DELUXE, PLANK, TOM, ARS, WAR or a CUSTOM name.
+     * @param schm the name of the schematic file to use can be BUDGET, BIGGER,
+     * ELEVENTH, TWELFTH, REDSTONE, STEAMPUNK, DELUXE, PLANK, TOM, ARS, WAR,
+     * PYRAMID, MASTER or a CUSTOM name.
      * @param world the world where the TARDIS is to be built.
      * @param dbID the unique key of the record for this TARDIS in the database.
      * @param p an instance of the player who owns the TARDIS.
@@ -95,12 +98,10 @@ public class TARDISBuilderInner {
         int starty;
         if (below) {
             starty = 15;
+        } else if (schm.getPermission().equals("redstone")) {
+            starty = 65;
         } else {
-            if (schm.getPermission().equals("redstone")) {
-                starty = 65;
-            } else {
-                starty = 64;
-            }
+            starty = 64;
         }
         String directory = (schm.isCustom()) ? "user_schematics" : "schematics";
         String path = plugin.getDataFolder() + File.separator + directory + File.separator + schm.getPermission() + ".tschm";
@@ -141,18 +142,28 @@ public class TARDISBuilderInner {
         TARDISTIPSData pos = null;
         if (tips) { // default world - use TIPS
             TARDISInteriorPostioning tintpos = new TARDISInteriorPostioning(plugin);
-            int slot = tintpos.getFreeSlot();
+            int slot;
+            if (schm.getPermission().equals("junk")) {
+                slot = -999;
+                pos = tintpos.getTIPSJunkData();
+            } else {
+                slot = tintpos.getFreeSlot();
+                pos = tintpos.getTIPSData(slot);
+            }
             // save the slot
             set.put("tips", slot);
-            pos = tintpos.getTIPSData(slot);
             startx = pos.getCentreX();
             resetx = pos.getCentreX();
             startz = pos.getCentreZ();
             resetz = pos.getCentreZ();
             // get the correct chunk for ARS
-            Chunk c = world.getChunkAt(new Location(world, startx, starty, startz));
+            Location cl = new Location(world, startx, starty, startz);
+            Chunk c = world.getChunkAt(cl);
             String chun = world.getName() + ":" + c.getX() + ":" + c.getZ();
             set.put("chunk", chun);
+            if (schm.getPermission().equals("junk")) {
+                set.put("creeper", cl.toString());
+            }
         } else {
             int gsl[] = plugin.getLocationUtils().getStartLocation(dbID);
             startx = gsl[0];
@@ -213,11 +224,6 @@ public class TARDISBuilderInner {
                     }
                     type = Material.valueOf((String) c.get("type"));
                     data = c.getByte("data");
-                    if (type.equals(Material.BEDROCK)) {
-                        // remember bedrock location to block off the beacon light
-                        String bedrocloc = world.getName() + ":" + x + ":" + y + ":" + z;
-                        set.put("beacon", bedrocloc);
-                    }
                     if (type.equals(Material.NOTE_BLOCK)) {
                         // remember the location of this Disk Storage
                         String storage = TARDISLocationGetters.makeLocationStr(world, x, y, z);
@@ -249,10 +255,8 @@ public class TARDISBuilderInner {
                                             type = floor_type;
                                             data = floor_data;
                                     }
-                                } else {
-                                    if (plugin.getConfig().getBoolean("creation.use_clay")) {
-                                        type = Material.STAINED_CLAY;
-                                    }
+                                } else if (plugin.getConfig().getBoolean("creation.use_clay")) {
+                                    type = Material.STAINED_CLAY;
                                 }
                                 break;
                             default:
@@ -297,7 +301,7 @@ public class TARDISBuilderInner {
                             data = (byte) 9;
                         }
                     }
-                    if (type.equals(Material.STONE_BUTTON)) { // random button
+                    if (type.equals(Material.STONE_BUTTON) && !schm.getPermission().equals("junk")) { // random button
                         // remember the location of this button
                         String button = TARDISLocationGetters.makeLocationStr(world, x, y, z);
                         qf.insertSyncControl(dbID, 1, button, 0);
@@ -309,15 +313,16 @@ public class TARDISBuilderInner {
                         // check if player has storage record, and update the tardis_id field
                         plugin.getUtils().updateStorageId(playerUUID, dbID, qf);
                     }
-                    if (type.equals(Material.CAKE_BLOCK)) {
+                    if (type.equals(Material.CAKE_BLOCK) && !schm.getPermission().equals("junk")) {
                         /*
                          * This block will be converted to a lever by
-                         * setBlock(), but remember it so we can use it as the handbrake!
+                         * setBlock(), but remember it so we can use it as the
+                         * handbrake!
                          */
                         String handbrakeloc = TARDISLocationGetters.makeLocationStr(world, x, y, z);
                         qf.insertSyncControl(dbID, 0, handbrakeloc, 0);
                     }
-                    if (type.equals(Material.MONSTER_EGGS)) { // silverfish stone
+                    if (type.equals(Material.MONSTER_EGGS) && !schm.getPermission().equals("junk")) { // silverfish stone
                         String blockLocStr = (new Location(world, x, y, z)).toString();
                         switch (data) {
                             case 0: // Save Sign
@@ -396,10 +401,10 @@ public class TARDISBuilderInner {
                         set.put("creeper", creeploc);
                         type = (schm.getPermission().equals("bigger") || schm.getPermission().equals("deluxe") || schm.getPermission().equals("twelfth")) ? Material.BEACON : Material.SMOOTH_BRICK;
                     }
-                    if (type.equals(Material.WOOD_BUTTON)) {
+                    if (type.equals(Material.WOOD_BUTTON) && !schm.getPermission().equals("junk")) {
                         /*
-                         * wood button will be coverted to the correct id by
-                         * setBlock(), but remember it for the Artron Energy Capacitor.
+                         * wood button - remember it for the Artron Energy
+                         * Capacitor.
                          */
                         String woodbuttonloc = TARDISLocationGetters.makeLocationStr(world, x, y, z);
                         qf.insertSyncControl(dbID, 6, woodbuttonloc, 0);
@@ -495,6 +500,11 @@ public class TARDISBuilderInner {
                             swap = Material.STONE;
                         }
                         TARDISBlockSetters.setBlock(world, x, y, z, swap, data);
+                    } else if (type.equals(Material.BEDROCK)) {
+                        // remember bedrock location to block off the beacon light
+                        String bedrocloc = world.getName() + ":" + x + ":" + y + ":" + z;
+                        set.put("beacon", bedrocloc);
+                        postBedrock = world.getBlockAt(x, y, z);
                     } else {
                         TARDISBlockSetters.setBlock(world, x, y, z, type, data);
                     }
@@ -576,6 +586,9 @@ public class TARDISBuilderInner {
             }
             s++;
         }
+        if (postBedrock != null) {
+            postBedrock.setType(Material.REDSTONE_BLOCK);
+        }
         if (postSaveSignBlock != null) {
             postSaveSignBlock.setType(Material.WALL_SIGN);
             postSaveSignBlock.setData((byte) 3, true);
@@ -590,12 +603,13 @@ public class TARDISBuilderInner {
         }
         if (postTerminalBlock != null) {
             postTerminalBlock.setType(Material.WALL_SIGN);
-            postTerminalBlock.setData((byte) 3, true);
+            byte ptb_data = (schm.getPermission().equals("junk")) ? (byte) 5 : 3;
+            postTerminalBlock.setData(ptb_data, true);
             if (postTerminalBlock.getType().equals(Material.WALL_SIGN)) {
                 Sign ts = (Sign) postTerminalBlock.getState();
-                ts.setLine(0, "");
-                ts.setLine(1, plugin.getSigns().getStringList("terminal").get(0));
-                ts.setLine(2, plugin.getSigns().getStringList("terminal").get(1));
+                ts.setLine(0, ((schm.getPermission().equals("junk")) ? plugin.getSigns().getStringList("junk").get(0) : ""));
+                ts.setLine(1, ((!schm.getPermission().equals("junk")) ? plugin.getSigns().getStringList("terminal").get(0) : ""));
+                ts.setLine(2, ((!schm.getPermission().equals("junk")) ? plugin.getSigns().getStringList("terminal").get(1) : ""));
                 ts.setLine(3, "");
                 ts.update();
             }
@@ -658,7 +672,8 @@ public class TARDISBuilderInner {
         if (plugin.isWorldGuardOnServer() && plugin.getConfig().getBoolean("preferences.use_worldguard")) {
             if (tips) {
                 if (pos != null) {
-                    plugin.getWorldGuardUtils().addWGProtection(p.getName(), pos, world);
+                    String name = (schm.getPermission().equals("junk")) ? "junk" : p.getName();
+                    plugin.getWorldGuardUtils().addWGProtection(name, pos, world);
                 }
             } else {
                 plugin.getWorldGuardUtils().addWGProtection(p, wg1, wg2);

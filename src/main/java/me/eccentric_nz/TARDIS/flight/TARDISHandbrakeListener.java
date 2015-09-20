@@ -34,6 +34,7 @@ import me.eccentric_nz.TARDIS.database.ResultSetPlayerPrefs;
 import me.eccentric_nz.TARDIS.database.ResultSetTardis;
 import me.eccentric_nz.TARDIS.enumeration.COMPASS;
 import me.eccentric_nz.TARDIS.enumeration.DISK_CIRCUIT;
+import me.eccentric_nz.TARDIS.enumeration.PRESET;
 import me.eccentric_nz.TARDIS.travel.TARDISMalfunction;
 import me.eccentric_nz.TARDIS.utility.TARDISLocationGetters;
 import me.eccentric_nz.TARDIS.utility.TARDISMessage;
@@ -86,10 +87,9 @@ public class TARDISHandbrakeListener implements Listener {
             if (blockType == Material.LEVER) {
                 // Checks handbrake location against the database.
                 final Location handbrake_loc = block.getLocation();
-                String hb_loc = block.getLocation().toString();
                 HashMap<String, Object> where = new HashMap<String, Object>();
                 where.put("type", 0);
-                where.put("location", hb_loc);
+                where.put("location", handbrake_loc.toString());
                 ResultSetControls rsc = new ResultSetControls(plugin, where, false);
                 if (rsc.resultSet()) {
                     event.setCancelled(true);
@@ -118,6 +118,9 @@ public class TARDISHandbrakeListener implements Listener {
                     final HashMap<String, Object> setdoor = new HashMap<String, Object>();
                     final HashMap<String, Object> wheredoor = new HashMap<String, Object>();
                     if (rs.resultSet()) {
+                        if (rs.getPreset().equals(PRESET.JUNK)) {
+                            return;
+                        }
                         UUID ownerUUID = rs.getUuid();
                         final UUID uuid = player.getUniqueId();
                         if ((rs.isIso_on() && !uuid.equals(ownerUUID) && event.isCancelled() && !player.hasPermission("tardis.skeletonkey")) || plugin.getTrackerKeeper().getJohnSmith().containsKey(uuid)) {
@@ -460,7 +463,7 @@ public class TARDISHandbrakeListener implements Listener {
         int bz = TARDISNumberParsers.parseInt(beaconData[3]);
         Location bl = new Location(w, bx, by, bz);
         Block b = bl.getBlock();
-        b.setType((on) ? Material.GLASS : Material.BEDROCK);
+        b.setType((on) ? Material.GLASS : Material.REDSTONE_BLOCK);
     }
 
     @SuppressWarnings("deprecation")

@@ -254,6 +254,9 @@ public class TARDISUpdateListener implements Listener {
                     set.put("location", blockLocStr);
                 }
             }
+            if (blockName.equalsIgnoreCase("beacon")) {
+                set.put("beacon", blockLocStr);
+            }
             if (blockName.equalsIgnoreCase("condenser") && blockType == Material.CHEST) {
                 set.put("condenser", blockLocStr);
             }
@@ -457,7 +460,7 @@ public class TARDISUpdateListener implements Listener {
                             }
                         }
                         int control = schm.getSeedId();
-                        if (schm.getPermission().equals("deluxe")) {
+                        if (schm.getPermission().equals("deluxe") || schm.getPermission().equals("eleventh") || schm.getPermission().equals("master")) {
                             empty[0][4][4] = control;
                             empty[0][4][5] = control;
                             empty[0][5][4] = control;
@@ -465,19 +468,7 @@ public class TARDISUpdateListener implements Listener {
                             empty[1][4][5] = control;
                             empty[1][5][4] = control;
                             empty[1][5][5] = control;
-                        } else if (schm.getPermission().equals("eleventh")) {
-                            empty[0][4][4] = control;
-                            empty[0][4][5] = control;
-                            empty[0][5][4] = control;
-                            empty[0][5][5] = control;
-                            empty[1][4][5] = control;
-                            empty[1][5][4] = control;
-                            empty[1][5][5] = control;
-                        } else if (schm.getPermission().equals("bigger")) {
-                            empty[1][4][5] = control;
-                            empty[1][5][4] = control;
-                            empty[1][5][5] = control;
-                        } else if (schm.getPermission().equals("redstone")) {
+                        } else if (schm.getPermission().equals("bigger") || schm.getPermission().equals("redstone") || schm.getPermission().equals("twelfth")) {
                             empty[1][4][5] = control;
                             empty[1][5][4] = control;
                             empty[1][5][5] = control;

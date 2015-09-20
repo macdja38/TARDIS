@@ -33,7 +33,10 @@ import me.eccentric_nz.TARDIS.arch.TARDISSelectWatchListener;
 import me.eccentric_nz.TARDIS.artron.TARDISArtronCapacitorListener;
 import me.eccentric_nz.TARDIS.artron.TARDISArtronFurnaceListener;
 import me.eccentric_nz.TARDIS.artron.TARDISCondenserListener;
+import me.eccentric_nz.TARDIS.chameleon.TARDISChameleonConstructorListener;
+import me.eccentric_nz.TARDIS.chameleon.TARDISChameleonHelpListener;
 import me.eccentric_nz.TARDIS.chameleon.TARDISChameleonListener;
+import me.eccentric_nz.TARDIS.chameleon.TARDISChameleonTemplateListener;
 import me.eccentric_nz.TARDIS.chameleon.TARDISPageThreeListener;
 import me.eccentric_nz.TARDIS.chameleon.TARDISPresetListener;
 import me.eccentric_nz.TARDIS.commands.admin.TARDISAdminMenuListener;
@@ -50,6 +53,7 @@ import me.eccentric_nz.TARDIS.howto.TARDISRecipeMenuListener;
 import me.eccentric_nz.TARDIS.howto.TARDISSeedMenuListener;
 import me.eccentric_nz.TARDIS.howto.TARDISWallFloorMenuListener;
 import me.eccentric_nz.TARDIS.info.TARDISInformationSystemListener;
+import me.eccentric_nz.TARDIS.junk.TARDISJunkControlListener;
 import me.eccentric_nz.TARDIS.lazarus.TARDISLazarusGUIListener;
 import me.eccentric_nz.TARDIS.lazarus.TARDISLazarusListener;
 import me.eccentric_nz.TARDIS.listeners.TARDISAntiBuildListener;
@@ -181,6 +185,9 @@ public class TARDISListenerRegisterer {
         plugin.getPM().registerEvents(new TARDISBlockDamageListener(plugin), plugin);
         plugin.getPM().registerEvents(new TARDISBlockPhysicsListener(plugin), plugin);
         plugin.getPM().registerEvents(new TARDISChameleonListener(plugin), plugin);
+        plugin.getPM().registerEvents(new TARDISChameleonConstructorListener(plugin), plugin);
+        plugin.getPM().registerEvents(new TARDISChameleonHelpListener(plugin), plugin);
+        plugin.getPM().registerEvents(new TARDISChameleonTemplateListener(plugin), plugin);
         plugin.getPM().registerEvents(new TARDISChatListener(plugin), plugin);
         plugin.getPM().registerEvents(new TARDISChunkListener(plugin), plugin);
         if (plugin.getConfig().getBoolean("circuits.damage")) {
@@ -212,6 +219,7 @@ public class TARDISListenerRegisterer {
         plugin.getPM().registerEvents(new TARDISInformationSystemListener(plugin), plugin);
         plugin.getPM().registerEvents(new TARDISJettisonSeeder(plugin), plugin);
         plugin.getPM().registerEvents(new TARDISJoinListener(plugin), plugin);
+        plugin.getPM().registerEvents(new TARDISJunkControlListener(plugin), plugin);
         plugin.getPM().registerEvents(new TARDISKeyboardListener(plugin), plugin);
         plugin.getPM().registerEvents(new TARDISKeyMenuListener(plugin), plugin);
         plugin.getPM().registerEvents(new TARDISLightningListener(plugin), plugin);

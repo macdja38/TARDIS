@@ -101,6 +101,7 @@ public class TARDISAdminCommands implements CommandExecutor {
         firstsBool.put("all_blocks", "allow");
         firstsBool.put("autonomous", "allow");
         firstsBool.put("chameleon", "travel");
+        firstsBool.put("check_blocks_before_upgrade", "desktop");
         firstsBool.put("create_worlds", "creation");
         firstsBool.put("create_worlds_with_perms", "creation");
         firstsBool.put("custom_schematic", "creation");
@@ -135,6 +136,7 @@ public class TARDISAdminCommands implements CommandExecutor {
         firstsBool.put("sfx", "allow");
         firstsBool.put("sky_biome", "creation");
         firstsBool.put("spawn_eggs", "allow");
+        firstsBool.put("spawn_random_monsters", "preferences");
         firstsBool.put("strike_lightning", "preferences");
         firstsBool.put("the_end", "travel");
         firstsBool.put("tp_switch", "allow");
@@ -147,6 +149,7 @@ public class TARDISAdminCommands implements CommandExecutor {
         firstsBool.put("zero_room", "allow");
         // integer
         firstsInt.put("ars_limit", "growth");
+        firstsInt.put("block_change_percent", "desktop");
         firstsInt.put("border_radius", "creation");
         firstsInt.put("confirm_timeout", "police_box");
         firstsInt.put("count", "creation");

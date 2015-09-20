@@ -36,6 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.eccentric_nz.TARDIS.api.TARDII;
 import me.eccentric_nz.TARDIS.arch.TARDISArchPersister;
+import me.eccentric_nz.TARDIS.artron.TARDISArtronFurnaceParticle;
 import me.eccentric_nz.TARDIS.artron.TARDISCondensables;
 import me.eccentric_nz.TARDIS.artron.TARDISCreeperChecker;
 import me.eccentric_nz.TARDIS.artron.TARDISStandbyMode;
@@ -66,6 +67,7 @@ import me.eccentric_nz.TARDIS.files.TARDISFileCopier;
 import me.eccentric_nz.TARDIS.files.TARDISLanguageUpdater;
 import me.eccentric_nz.TARDIS.files.TARDISRecipesUpdater;
 import me.eccentric_nz.TARDIS.files.TARDISRoomMap;
+import me.eccentric_nz.TARDIS.junk.TARDISJunkReturnRunnable;
 import me.eccentric_nz.TARDIS.move.TARDISMonsterRunnable;
 import me.eccentric_nz.TARDIS.move.TARDISPortalPersister;
 import me.eccentric_nz.TARDIS.move.TARDISSpectaclesRunnable;
@@ -78,6 +80,7 @@ import me.eccentric_nz.TARDIS.siegemode.TARDISSiegeRunnable;
 import me.eccentric_nz.TARDIS.travel.TARDISArea;
 import me.eccentric_nz.TARDIS.travel.TARDISPluginRespect;
 import me.eccentric_nz.TARDIS.utility.TARDISBlockSetters;
+import me.eccentric_nz.TARDIS.utility.TARDISEffectLibHelper;
 import me.eccentric_nz.TARDIS.utility.TARDISLocationGetters;
 import me.eccentric_nz.TARDIS.utility.TARDISMapChecker;
 import me.eccentric_nz.TARDIS.utility.TARDISMultiverseHelper;
@@ -127,6 +130,7 @@ public class TARDIS extends JavaPlugin {
     private FileConfiguration kitsConfig;
     private FileConfiguration language;
     private FileConfiguration signs;
+    private FileConfiguration chameleonGuis;
     private FileConfiguration recipesConfig;
     private FileConfiguration roomsConfig;
     private FileConfiguration tagConfig;
@@ -153,6 +157,7 @@ public class TARDIS extends JavaPlugin {
     private boolean barAPIOnServer;
     private boolean disguisesOnServer;
     private boolean mvOnServer;
+    private boolean effectLibOnServer;
     private PluginManager pm;
     private final TARDISArea tardisArea = new TARDISArea(this);
     private final TARDISBuilderInner interiorBuilder = new TARDISBuilderInner(this);
@@ -175,8 +180,10 @@ public class TARDIS extends JavaPlugin {
         this.helperOnServer = false;
         this.barAPIOnServer = false;
         this.mvOnServer = false;
+        this.effectLibOnServer = false;
         this.versions.put("BarAPI", "3.3");
         this.versions.put("Citizens", "2.0.16");
+        this.versions.put("EffectLib", "3.4");
         this.versions.put("Factions", "2.7.4");
         this.versions.put("GriefPrevention", "10");
         this.versions.put("LibsDisguises", "8.5.1");
@@ -218,10 +225,11 @@ public class TARDIS extends JavaPlugin {
                 }
                 saveDefaultConfig();
                 loadCustomConfigs();
-                new TARDISConfiguration(this).checkConfig();
-                new TARDISRecipesUpdater(this).addRecipes();
                 loadLanguage();
                 loadSigns();
+                loadChameleonGUIs();
+                new TARDISConfiguration(this).checkConfig();
+                new TARDISRecipesUpdater(this).addRecipes();
                 prefix = getConfig().getString("storage.mysql.prefix");
                 loadDatabase();
                 // update database add and populate uuid fields
@@ -281,6 +289,7 @@ public class TARDIS extends JavaPlugin {
                 loadWorldGuard();
                 loadPluginRespect();
                 loadBarAPI();
+                this.effectLibOnServer = pm.isPluginEnabled("EffectLib");
                 startZeroHealing();
 
                 new TARDISCreeperChecker(this).startCreeperCheck();
@@ -347,6 +356,14 @@ public class TARDIS extends JavaPlugin {
                 condensables = cond.getCondensables();
                 checkBiomes();
                 checkDropChests();
+                if (artronConfig.getBoolean("artron_furnace.particles") && pm.isPluginEnabled("EffectLib")) {
+                    new TARDISArtronFurnaceParticle(this).addParticles();
+                }
+                if (getConfig().getBoolean("junk.enabled") && getConfig().getLong("junk.return") > 0) {
+                    generalKeeper.setJunkTime(System.currentTimeMillis());
+                    long delay = getConfig().getLong("junk.return") * 20L;
+                    getServer().getScheduler().scheduleSyncRepeatingTask(this, new TARDISJunkReturnRunnable(this), delay, delay);
+                }
             } catch (ClassNotFoundException e) {
                 console.sendMessage(pluginName + ChatColor.RED + "You need to update CraftBukkit/Spigot, disabling...");
                 pm.disablePlugin(this);
@@ -399,6 +416,9 @@ public class TARDIS extends JavaPlugin {
             }
             if (disguisesOnServer && getConfig().getBoolean("arch.enabled")) {
                 new TARDISArchPersister(this).saveAll();
+            }
+            if (effectLibOnServer) {
+                TARDISEffectLibHelper.close();
             }
             if (getConfig().getBoolean("siege.enabled")) {
                 new TARDISSiegePersister(this).saveCubes();
@@ -492,6 +512,22 @@ public class TARDIS extends JavaPlugin {
         }
         // load the language
         this.signs = YamlConfiguration.loadConfiguration(file);
+    }
+
+    /**
+     * Loads the chamelon_guis file.
+     */
+    private void loadChameleonGUIs() {
+        // check file exists
+        File file;
+        file = new File(getDataFolder() + File.separator + "language" + File.separator + "chameleon_guis.yml");
+        if (!file.exists()) {
+            // copy sign file
+            TARDISFileCopier.copy(getDataFolder() + File.separator + "language" + File.separator + "chameleon_guis.yml", getResource("chameleon_guis.yml"), true, pluginName);
+            file = new File(getDataFolder() + File.separator + "language" + File.separator + "chameleon_guis.yml");
+        }
+        // load the language
+        this.chameleonGuis = YamlConfiguration.loadConfiguration(file);
     }
 
     /**
@@ -943,6 +979,10 @@ public class TARDIS extends JavaPlugin {
         return signs;
     }
 
+    public FileConfiguration getChameleonGuis() {
+        return chameleonGuis;
+    }
+
     public TARDISUtils getUtils() {
         return utils;
     }
@@ -1069,6 +1109,10 @@ public class TARDIS extends JavaPlugin {
 
     public boolean isDisguisesOnServer() {
         return disguisesOnServer;
+    }
+
+    public boolean isEffectLibOnServer() {
+        return effectLibOnServer;
     }
 
     public PluginManager getPM() {

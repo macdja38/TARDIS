@@ -64,7 +64,9 @@ public class TARDISFileCopier {
                 plugin.getConsole().sendMessage(plugin.getPluginName() + "Created user_schematics directory.");
             }
         }
-        // TARDIS schematics supplied by Lord_Rahl and killeratnight at mcnovus.net
+        // DELUXE, ELEVENTH, TWELFTH, ARS & REDSTONE schematics supplied by Lord_Rahl and killeratnight at mcnovus.net
+        // The PYRAMID schematic supplied by airomis (player at thatsnotacreeper.com)
+        // The MASTER's schematic supplied by macdja38 at pvpcraft.ca
         // load schematic files - copy the default files if they don't exist
         String basepath = plugin.getDataFolder() + File.separator + "schematics" + File.separator;
         String userbasepath = plugin.getDataFolder() + File.separator + "user_schematics" + File.separator;
@@ -83,6 +85,8 @@ public class TARDISFileCopier {
         }
         String zeronstr = basepath + "zero.tschm";
         copy(zeronstr, plugin.getResource("zero.tschm"), false, plugin.getPluginName());
+        String junknstr = basepath + "junk.tschm";
+        copy(junknstr, plugin.getResource("junk.tschm"), true, plugin.getPluginName());
         String tmpnstr = userbasepath + "template.tschm";
         copy(tmpnstr, plugin.getResource("template.tschm"), false, plugin.getPluginName());
     }

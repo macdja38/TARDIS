@@ -76,6 +76,8 @@ public class TARDISMySQLDatabaseUpdater {
         prefsupdates.add("wool_lights_on int(1) DEFAULT '0'");
         prefsupdates.add("travelbar_on int(1) DEFAULT '0'");
         prefsupdates.add("auto_siege_on int(1) DEFAULT '0'");
+        prefsupdates.add("siege_wall varchar(64) DEFAULT 'GREY_CLAY'");
+        prefsupdates.add("siege_floor varchar(64) DEFAULT 'BLACK_CLAY'");
         destsupdates.add("slot int(1) DEFAULT '-1'");
         countupdates.add("grace int(3) DEFAULT '0'");
         inventoryupdates.add("attributes text");
@@ -154,6 +156,14 @@ public class TARDISMySQLDatabaseUpdater {
                 i++;
                 String bio_alter = "ALTER TABLE " + prefix + "current ADD biome varchar(64) DEFAULT ''";
                 statement.executeUpdate(bio_alter);
+            }
+            // add parking_distance to areas
+            String park_query = "SHOW COLUMNS FROM " + prefix + "areas LIKE 'parking_distance'";
+            ResultSet rspark = statement.executeQuery(park_query);
+            if (!rspark.next()) {
+                i++;
+                String park_alter = "ALTER TABLE " + prefix + "areas ADD parking_distance int(2) DEFAULT '2'";
+                statement.executeUpdate(park_alter);
             }
         } catch (SQLException e) {
             plugin.debug("MySQL database add fields error: " + e.getMessage() + e.getErrorCode());

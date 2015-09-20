@@ -45,6 +45,7 @@ public class TARDISConfiguration {
     private FileConfiguration artron_config = null;
     private FileConfiguration blocks_config = null;
     private FileConfiguration rooms_config = null;
+    private FileConfiguration signs_config = null;
     private File configFile = null;
     HashMap<String, String> strOptions = new HashMap<String, String>();
     HashMap<String, Integer> intOptions = new HashMap<String, Integer>();
@@ -52,9 +53,11 @@ public class TARDISConfiguration {
     HashMap<String, String> roomStrOptions = new HashMap<String, String>();
     HashMap<String, Integer> roomIntOptions = new HashMap<String, Integer>();
     HashMap<String, Boolean> roomBoolOptions = new HashMap<String, Boolean>();
+    HashMap<String, Boolean> artronBoolOptions = new HashMap<String, Boolean>();
     HashMap<String, String> artronStrOptions = new HashMap<String, String>();
     HashMap<String, Double> artronDoubleOptions = new HashMap<String, Double>();
     HashMap<String, Integer> artronIntOptions = new HashMap<String, Integer>();
+    HashMap<String, List<String>> signListOptions = new HashMap<String, List<String>>();
 
     public TARDISConfiguration(TARDIS plugin) {
         this.plugin = plugin;
@@ -63,6 +66,7 @@ public class TARDISConfiguration {
         this.artron_config = plugin.getArtronConfig();
         this.blocks_config = plugin.getBlocksConfig();
         this.rooms_config = plugin.getRoomsConfig();
+        this.signs_config = plugin.getSigns();
         // boolean
         boolOptions.put("allow.3d_doors", false);
         boolOptions.put("allow.achievements", true);
@@ -104,8 +108,11 @@ public class TARDISConfiguration {
         boolOptions.put("creation.use_block_stack", false);
         boolOptions.put("creation.use_clay", false);
         boolOptions.put("debug", false);
+        boolOptions.put("desktop.check_blocks_before_upgrade", false);
         boolOptions.put("growth.return_room_seed", true);
         boolOptions.put("growth.rooms_require_blocks", false);
+        boolOptions.put("junk.enabled", true);
+        boolOptions.put("junk.particles", true);
         boolOptions.put("police_box.materialise", true);
         boolOptions.put("police_box.name_tardis", false);
         boolOptions.put("police_box.set_biome", true);
@@ -115,6 +122,7 @@ public class TARDISConfiguration {
         boolOptions.put("preferences.respect_factions", true);
         boolOptions.put("preferences.respect_grief_prevention", true);
         boolOptions.put("preferences.respect_worldborder", true);
+        boolOptions.put("preferences.spawn_random_monsters", true);
         boolOptions.put("preferences.use_worldguard", true);
         boolOptions.put("preferences.strike_lightning", true);
         boolOptions.put("preferences.use_default_condensables", true);
@@ -183,6 +191,9 @@ public class TARDISConfiguration {
         roomBoolOptions.put("rooms.WORKSHOP.user", false);
         roomBoolOptions.put("rooms.ZERO.enabled", true);
         roomBoolOptions.put("rooms.ZERO.user", false);
+        // boolean
+        artronBoolOptions.put("artron_furnace.particles", true);
+        artronBoolOptions.put("artron_furnace.set_biome", true);
         // double
         artronDoubleOptions.put("artron_furnace.burn_time", 0.5);
         artronDoubleOptions.put("artron_furnace.cook_time", 0.5);
@@ -217,7 +228,9 @@ public class TARDISConfiguration {
         artronIntOptions.put("upgrades.budget", 5000);
         artronIntOptions.put("upgrades.deluxe", 10000);
         artronIntOptions.put("upgrades.eleventh", 10000);
+        artronIntOptions.put("upgrades.master", 10000);
         artronIntOptions.put("upgrades.plank", 5000);
+        artronIntOptions.put("upgrades.pyramid", 5000);
         artronIntOptions.put("upgrades.redstone", 7500);
         artronIntOptions.put("upgrades.steampunk", 5000);
         artronIntOptions.put("upgrades.tom", 5000);
@@ -238,11 +251,13 @@ public class TARDISConfiguration {
         intOptions.put("creation.count", 0);
         intOptions.put("creation.inventory_group", 0);
         intOptions.put("creation.tips_limit", 400);
+        intOptions.put("desktop.block_change_percent", 25);
         intOptions.put("growth.ars_limit", 1);
         intOptions.put("growth.gravity_max_distance", 16);
         intOptions.put("growth.gravity_max_velocity", 5);
         intOptions.put("growth.room_speed", 4);
         intOptions.put("growth.rooms_condenser_percent", 100);
+        intOptions.put("junk.return", -1);
         intOptions.put("police_box.confirm_timeout", 15);
         intOptions.put("police_box.platform_data", 8);
         intOptions.put("police_box.platform_id", 35);
@@ -369,6 +384,7 @@ public class TARDISConfiguration {
         roomStrOptions.put("rooms.WOOD.seed", "WOOD");
         roomStrOptions.put("rooms.WORKSHOP.seed", "NETHER_BRICK");
         roomStrOptions.put("rooms.ZERO.seed", "WOOD_BUTTON");
+        signListOptions.put("junk", Arrays.asList("Destination"));
     }
 
     /**
@@ -447,6 +463,7 @@ public class TARDISConfiguration {
         checkArtronConfig();
         checkBlocksConfig();
         checkRoomsConfig();
+        checkSignsConfig();
         plugin.saveConfig();
     }
 
@@ -516,7 +533,7 @@ public class TARDISConfiguration {
                 plugin.getConsole().sendMessage(plugin.getPluginName() + "Added " + ChatColor.AQUA + i + ChatColor.RESET + " new items to rooms.yml");
             }
         } catch (IOException io) {
-            plugin.debug("Could not save rooms.yml, " + io);
+            plugin.debug("Could not save rooms.yml, " + io.getMessage());
         }
     }
 
@@ -596,16 +613,20 @@ public class TARDISConfiguration {
         }
         // add lamp blocks
         if (!blocks_config.contains("lamp_blocks")) {
-            List<Integer> LAMP_BLOCKS = Arrays.asList(50, 76, 89, 91, 123, 169);
+            List<String> LAMP_BLOCKS = Arrays.asList("TORCH", "REDSTONE_TORCH_ON", "GLOWSTONE", "JACK_O_LANTERN", "REDSTONE_LAMP_OFF", "SEA_LANTERN");
             blocks_config.set("lamp_blocks", LAMP_BLOCKS);
             i++;
-        } else {
-            List<Integer> lblocs = blocks_config.getIntegerList("lamp_blocks");
-            if (!lblocs.contains(169)) {
-                lblocs.add(169);
-                blocks_config.set("lamp_blocks", lblocs);
-                i++;
+        } else if (blocks_config.getStringList("lamp_blocks").get(0).equals("50")) {
+            List<String> lstrs = new ArrayList<String>();
+            for (int l : blocks_config.getIntegerList("lamp_blocks")) {
+                try {
+                    lstrs.add(Material.getMaterial(l).toString());
+                } catch (Exception e) {
+                    plugin.debug("Invalid Material ID in lamp_blocks section.");
+                }
             }
+            blocks_config.set("lamp_blocks", lstrs);
+            i++;
         }
         if (!blocks_config.contains("under_door_blocks")) {
             List<Integer> UNDER_BLOCKS = Arrays.asList(0, 6, 8, 9, 10, 11, 18, 20, 26, 27, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 44, 46, 50, 51, 53, 54, 55, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 75, 76, 77, 78, 79, 81, 83, 85, 89, 92, 93, 94, 96, 101, 102, 104, 105, 106, 107, 108, 109, 111, 113, 114, 115, 116, 117, 118, 119, 120, 122, 126, 128, 130, 131, 132, 134, 135, 136, 161, 171);
@@ -634,16 +655,18 @@ public class TARDISConfiguration {
                 plugin.getConsole().sendMessage(plugin.getPluginName() + "Added " + ChatColor.AQUA + i + ChatColor.RESET + " new items to blocks.yml");
             }
         } catch (IOException io) {
-            plugin.debug("Could not save blocks.yml, " + io);
+            plugin.debug("Could not save blocks.yml, " + io.getMessage());
         }
     }
 
     private void checkArtronConfig() {
         int i = 0;
         // boolean values
-        if (!artron_config.contains("artron_furnace.set_biome")) {
-            artron_config.set("artron_furnace.set_biome", true);
-            i++;
+        for (Map.Entry<String, Boolean> entry : artronBoolOptions.entrySet()) {
+            if (!artron_config.contains(entry.getKey())) {
+                artron_config.set(entry.getKey(), entry.getValue());
+                i++;
+            }
         }
         // double values
         for (Map.Entry<String, Double> entry : artronDoubleOptions.entrySet()) {
@@ -682,7 +705,26 @@ public class TARDISConfiguration {
                 plugin.getConsole().sendMessage(plugin.getPluginName() + "Added " + ChatColor.AQUA + i + ChatColor.RESET + " new items to artron.yml");
             }
         } catch (IOException io) {
-            plugin.debug("Could not save artron.yml, " + io);
+            plugin.debug("Could not save artron.yml, " + io.getMessage());
+        }
+    }
+
+    public void checkSignsConfig() {
+        int i = 0;
+        for (Map.Entry<String, List<String>> entry : signListOptions.entrySet()) {
+            if (!signs_config.contains(entry.getKey())) {
+                signs_config.set(entry.getKey(), entry.getValue());
+                i++;
+            }
+        }
+        try {
+            String signPath = plugin.getDataFolder() + File.separator + "language" + File.separator + "signs.yml";
+            signs_config.save(new File(signPath));
+            if (i > 0) {
+                plugin.getConsole().sendMessage(plugin.getPluginName() + "Added " + ChatColor.AQUA + i + ChatColor.RESET + " new items to signs.yml");
+            }
+        } catch (IOException io) {
+            plugin.debug("Could not save signs.yml, " + io.getMessage());
         }
     }
 }

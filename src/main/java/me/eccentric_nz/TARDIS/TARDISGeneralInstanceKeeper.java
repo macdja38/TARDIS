@@ -74,12 +74,14 @@ public class TARDISGeneralInstanceKeeper {
     private final HashMap<String, Double[]> gravityWestList = new HashMap<String, Double[]>();
     private final HashMap<String, Integer> protectBlockMap = new HashMap<String, Integer>();
     private final HashMap<UUID, TARDISCondenserData> roomCondenserData = new HashMap<UUID, TARDISCondenserData>();
+    private final List<Block> artronFurnaces = new ArrayList<Block>();
     private final List<BlockFace> faces = Arrays.asList(BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH, BlockFace.EAST);
     private final List<BlockFace> surrounding = Arrays.asList(BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.NORTH_WEST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_WEST);
     private final List<Chunk> roomChunkList = new ArrayList<Chunk>();
     private final List<Chunk> tardisChunkList = new ArrayList<Chunk>();
     private final List<Chunk> railChunkList = new ArrayList<Chunk>();
     private final List<Location> rechargers = new ArrayList<Location>();
+    private final List<Material> doors = Arrays.asList(Material.IRON_DOOR_BLOCK, Material.WOODEN_DOOR, Material.SPRUCE_DOOR, Material.BIRCH_DOOR, Material.ACACIA_DOOR, Material.JUNGLE_DOOR, Material.DARK_OAK_DOOR);
     private final List<Material> rails = Arrays.asList(Material.POWERED_RAIL, Material.RAILS, Material.DETECTOR_RAIL, Material.ACTIVATOR_RAIL);
     private final List<Material> goodNether = Arrays.asList(Material.NETHERRACK, Material.SOUL_SAND, Material.GLOWSTONE, Material.NETHER_BRICK, Material.NETHER_FENCE, Material.NETHER_BRICK_STAIRS);
     private final List<String> gravityDownList = new ArrayList<String>();
@@ -91,6 +93,10 @@ public class TARDISGeneralInstanceKeeper {
     private final TARDIS plugin;
     private final TARDISUUIDCache UUIDCache;
     private final YamlConfiguration pluginYAML;
+    private long junkTime;
+    private boolean junkTravelling = false;
+    private Location junkDestination = null;
+    private final List<UUID> junkTravellers = new ArrayList<UUID>();
 
     public TARDISGeneralInstanceKeeper(TARDIS plugin) {
         this.plugin = plugin;
@@ -119,6 +125,10 @@ public class TARDISGeneralInstanceKeeper {
         this.quotes = quotes;
     }
 
+    public List<Block> getArtronFurnaces() {
+        return artronFurnaces;
+    }
+
     public List<BlockFace> getFaces() {
         return faces;
     }
@@ -137,6 +147,10 @@ public class TARDISGeneralInstanceKeeper {
 
     public List<Chunk> getRailChunkList() {
         return railChunkList;
+    }
+
+    public List<Material> getDoors() {
+        return doors;
     }
 
     public List<Material> getRails() {
@@ -285,6 +299,34 @@ public class TARDISGeneralInstanceKeeper {
 
     public YamlConfiguration getPluginYAML() {
         return pluginYAML;
+    }
+
+    public long getJunkTime() {
+        return junkTime;
+    }
+
+    public void setJunkTime(long junkTime) {
+        this.junkTime = junkTime;
+    }
+
+    public boolean isJunkTravelling() {
+        return junkTravelling;
+    }
+
+    public void setJunkTravelling(boolean junkTravelling) {
+        this.junkTravelling = junkTravelling;
+    }
+
+    public Location getJunkDestination() {
+        return junkDestination;
+    }
+
+    public void setJunkDestination(Location junkDestination) {
+        this.junkDestination = junkDestination;
+    }
+
+    public List<UUID> getJunkTravellers() {
+        return junkTravellers;
     }
 
     private void setRechargers() {

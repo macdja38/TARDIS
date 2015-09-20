@@ -270,6 +270,9 @@ public class TARDISInformationSystemListener implements Listener {
                         if (chat.equalsIgnoreCase("D")) {
                             processKey(p, TARDISInfoMenu.D_CIRCUIT);
                         }
+                        if (chat.equalsIgnoreCase("I")) {
+                            processKey(p, TARDISInfoMenu.IGNITE_CIRCUIT);
+                        }
                         if (chat.equalsIgnoreCase("m")) {
                             processKey(p, TARDISInfoMenu.E_CIRCUIT);
                         }
@@ -459,6 +462,9 @@ public class TARDISInformationSystemListener implements Listener {
                         if (chat.equalsIgnoreCase("P")) {
                             showInfo(p, TARDISInfoMenu.PYRAMID);
                         }
+                        if (chat.equalsIgnoreCase("M")) {
+                            showInfo(p, TARDISInfoMenu.MASTER);
+                        }
                         if (chat.equalsIgnoreCase("C")) {
                             showInfo(p, TARDISInfoMenu.CUSTOM);
                         }
@@ -606,6 +612,14 @@ public class TARDISInformationSystemListener implements Listener {
                         }
                         if (chat.equalsIgnoreCase("R")) {
                             showRecipe(p, TARDISInfoMenu.I_CIRCUIT_RECIPE);
+                        }
+                        break;
+                    case IGNITE_CIRCUIT:
+                        if (chat.equalsIgnoreCase("I")) {
+                            showInfo(p, TARDISInfoMenu.IGNITE_CIRCUIT_INFO);
+                        }
+                        if (chat.equalsIgnoreCase("R")) {
+                            showRecipe(p, TARDISInfoMenu.IGNITE_CIRCUIT_RECIPE);
                         }
                         break;
                     case INVISIBLE_CIRCUIT:

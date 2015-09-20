@@ -1,14 +1,12 @@
 #TODO
 
-##Current version `3.3-beta-1`
+##Current version `3.4-beta-1`
 1. Fix bugs
-2. Junk TARDIS
-3. Player configurable choice of (2) blocks that are changed during siege mode engagement
-   * Should default to wall / floor if not configured
-4. TARDISSonicBlaster addon
-5. MySQL table prefix
+2. Fry player/mob health if they venture into Junk TARDIS effects?
+3. Test area parking space variations
 
-##Upcoming version `3.4`
+##Upcoming version `3.5`
+* TARDISSonicBlaster addon?
 * ?
 
 ##Future version `4+`
@@ -18,12 +16,12 @@
 
 ##Resource Pack / TARDISWeepingAngels
 
-1. Don't teleport player to the top of the world when touched by an Angel in the Nether
+1. Re-visit TARDIS door being biom specific
 2. Re-skin mobs for Resource pack, and add new mob sounds
 
    * Villagers -> Ood - _started_
    * Villagers -> Hath
-   * Endermen -> The Silence
+   * Endermen -> The Silence - _started_
    * Endermites -> Cybermats
    * Iron Golem -> Gunslinger
    * Witches -> Slitheen / Whispermen?
